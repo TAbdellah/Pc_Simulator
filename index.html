@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖥️ PC STARTUP SIMULATOR</title>
+  <style>
+    body {
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+      color: white;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, #00ff88, transparent),
+        radial-gradient(2px 2px at 40px 70px, #00d9ff, transparent),
+        radial-gradient(1px 1px at 90px 40px, #ffffff, transparent),
+        radial-gradient(1px 1px at 130px 80px, #00ff88, transparent);
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      animation: sparkle 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes sparkle {
+      0% { transform: translateY(0px) translateX(0px); }
+      25% { transform: translateY(-100px) translateX(50px); }
+      50% { transform: translateY(-200px) translateX(-25px); }
+      75% { transform: translateY(-100px) translateX(75px); }
+      100% { transform: translateY(0px) translateX(0px); }
+    }
+
+    .header {
+      background: 
+        linear-gradient(45deg, rgba(0, 217, 255, 0.15), rgba(0, 255, 136, 0.15)),
+        rgba(0, 0, 0, 0.3);
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, #00d9ff, #00ff88, #00d9ff) 1;
+      padding: 15px 20px;
+      position: relative;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.2);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .title {
+      font-size: 20px;
+      background: linear-gradient(45deg, #00ff88, #00d9ff, #ffffff, #00ff88);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+      animation: gradientShift 4s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+      margin: 0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .scenario-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .scenario-btn {
+      padding: 8px 12px;
+      border: 2px solid transparent;
+      background: linear-gradient(45deg, rgba(0, 217, 255, 0.1), rgba(0, 255, 136, 0.1));
+      color: #00ff88;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 11px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      min-width: 80px;
+    }
+
+    .scenario-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .scenario-btn:hover::before {
+      left: 100%;
+    }
+
+    .scenario-btn.active {
+      background: linear-gradient(45deg, rgba(0, 255, 136, 0.3), rgba(0, 217, 255, 0.3));
+      border-color: #00ff88;
+      box-shadow: 
+        0 0 20px rgba(0, 255, 136, 0.6),
+        0 0 40px rgba(0, 255, 136, 0.3),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+  }
+
+    .scenario-btn:hover:not(.active) {
+      background: linear-gradient(45deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 136, 0.2));
+      border-color: #00d9ff;
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .signature-header {
+      text-align: right;
+      opacity: 0.8;
+      min-width: 300px;
+    }
+
+    .signature-creator {
+      font-size: 10px;
+      color: #ffffff;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    .signature-year {
+      font-size: 8px;
+      color: #888;
+    }
+
+  .main-layout {
+    display: flex;
+    gap: 15px;
+      height: calc(100vh - 100px);
+      padding: 15px;
+  }
+
+  .left-section {
+    flex: 2.5;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .monitor-screen {
+    flex: 1;
+    background: #000;
+    border: 4px solid #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 217, 255, 0.3), 0 20px 60px rgba(0, 0, 0, 0.8);
+  }
+
+  .monitor-header {
+    background: rgba(0, 50, 0, 0.6);
+    border-bottom: 2px solid #00ff88;
+    padding: 10px;
+    font-size: 11px;
+    color: #00ff88;
+    font-weight: bold;
+    text-align: center;
+    font-family: monospace;
+  }
+
+  .monitor-content {
+    flex: 1;
+    background: linear-gradient(to bottom, #001a00 0%, #000 100%);
+    overflow-y: auto;
+    padding: 15px;
+    font-size: 14px;
+    color: #00ff88;
+    font-family: 'Courier New', monospace;
+    line-height: 1.8;
+    position: relative;
+  }
+
+  .monitor-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+    animation: scan 0.08s linear infinite;
+    z-index: 1;
+  }
+
+  @keyframes scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(2px); }
+  }
+
+  .monitor-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  .screen-line {
+    margin: 3px 0;
+    animation: appear 0.4s ease-out;
+  }
+
+  @keyframes appear {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .screen-line.success {
+    color: #00ff88;
+    font-weight: bold;
+  }
+
+  .screen-line.error {
+    color: #ff6b6b;
+  }
+
+  .monitor-footer {
+    background: rgba(0, 30, 0, 0.6);
+    border-top: 2px solid #00ff88;
+    padding: 10px;
+    font-size: 11px;
+    color: #004400;
+    text-align: right;
+    font-family: monospace;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border: 2px solid #00d9ff;
+    background: rgba(0, 217, 255, 0.1);
+    color: #00ff88;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 11px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .right-section {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+  }
+
+  .schema-box {
+    background: rgba(0, 217, 255, 0.05);
+    border: 2px solid #00d9ff;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    min-height: 500px;
+  }
+
+  svg.canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+
+  .components-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  .motherboard-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .motherboard-center svg.motherboard-svg {
+    width: 320px;
+    height: auto;
+    filter: drop-shadow(0 0 18px rgba(0, 217, 255, 0.45));
+    display: block;
+    margin: 0 auto;
+  }
+
+  .mb-info {
+    font-size: 10px;
+    color: #00ff88;
+    font-weight: bold;
+    margin-top: 8px;
+    text-shadow: 0 0 6px rgba(0, 217, 255, 0.6);
+  }
+
+  .component {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .component-box {
+    width: 75px;
+    height: 75px;
+    border: 2px solid #00d9ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 217, 255, 0.08);
+    filter: drop-shadow(0 0 8px rgba(0, 217, 255, 0.3));
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+
+  .component-img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .component-label {
+    font-size: 9px;
+    color: #00d9ff;
+    text-align: center;
+  }
+
+  .component.active .component-box {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.2);
+    transform: scale(1.15);
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+  }
+
+  .component.active .component-label {
+    color: #00ff88;
+  }
+
+  #psu { top: 8%; left: 5%; }
+  #cpu { top: 8%; left: 28%; }
+  #ram { top: 8%; left: 51%; }
+  #ssd { top: 8%; left: 74%; }
+  #hdd { bottom: 8%; left: 15%; }
+  #gpu { bottom: 8%; left: 60%; }
+
+  .timeline-box {
+    background: rgba(0, 217, 255, 0.1);
+    border: 2px solid #00d9ff;
+    border-radius: 8px;
+    padding: 12px;
+    flex-shrink: 0;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .timeline-title {
+    font-size: 11px;
+    color: #00ff88;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 5px 0;
+    font-size: 9px;
+    color: #00d9ff;
+  }
+
+  .timeline-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00d9ff;
+    flex-shrink: 0;
+  }
+
+  .timeline-item.active .timeline-dot {
+    background: #ffff00;
+    animation: pulse 0.5s infinite;
+  }
+
+  .timeline-item.completed .timeline-dot {
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 217, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00d9ff);
+    width: 0%;
+    transition: width 0.2s;
+  }
+
+  .message-bubble {
+    position: fixed;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.95), rgba(0, 200, 200, 0.95));
+    color: #000;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 2px solid #00ff88;
+    font-weight: bold;
+    font-size: 11px;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.7);
+    max-width: 160px;
+    z-index: 999;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .data-packet {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff88;
+    z-index: 998;
+  }
+
+  .connection-line {
+    stroke: #00ff88;
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.6;
+    stroke-dasharray: 600;
+    animation: drawLine 0.9s ease-out forwards;
+  }
+
+  @keyframes drawLine {
+    0% { stroke-dashoffset: 600; opacity: 0; }
+    100% { stroke-dashoffset: 0; opacity: 0.6; }
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: #00d9ff; border-radius: 2px; }
+
+    .heart {
+      color: #ff6b6b;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Particules flottantes */
+    .particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: #00ff88;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      animation: float 6s linear infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) translateX(100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Effet de typing */
+    .typing::after {
+      content: '|';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Effet de glitch */
+    .glitch {
+      position: relative;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch::before {
+      animation: glitch-1 0.5s infinite;
+      color: #ff0000;
+      z-index: -1;
+    }
+
+    .glitch::after {
+      animation: glitch-2 0.5s infinite;
+      color: #00ffff;
+      z-index: -2;
+    }
+
+    @keyframes glitch-1 {
+      0%, 14%, 15%, 49%, 50%, 99%, 100% {
+        transform: translate(0);
+      }
+      15%, 49% {
+        transform: translate(-2px, 2px);
+      }
+    }
+
+    @keyframes glitch-2 {
+      0%, 20%, 21%, 62%, 63%, 99%, 100% {
+        transform: translate(0);
+      }
+      21%, 62% {
+        transform: translate(2px, -2px);
+      }
+    }
+
+    /* Effet de matrix */
+    .matrix-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.1;
+    }
+
+    .matrix-column {
+      position: absolute;
+      top: -100%;
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 14px;
+      animation: matrix-fall linear infinite;
+    }
+
+    @keyframes matrix-fall {
+      0% { top: -100%; }
+      100% { top: 100vh; }
+    }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <div class="title">🖥️ PC STARTUP SIMULATOR</div>
+      <div class="scenario-selector">
+        <button class="scenario-btn active" data-scenario="1">🔧 BIOS</button>
+        <button class="scenario-btn" data-scenario="2">🪟 Windows 11</button>
+        <button class="scenario-btn" data-scenario="3">📝 MS Word</button>
+        <button class="scenario-btn" data-scenario="4">🐧 Linux</button>
+        <button class="scenario-btn" data-scenario="5">🎮 Gaming</button>
+        <button class="scenario-btn" data-scenario="6">🤖 AI Mode</button>
+      </div>
+      <div class="signature-header">
+        <div class="signature-creator">Conception et réalisation : <strong>Abdellah TAHTOH</strong> • Fait avec <span class="heart">❤</span> au service de l'éducation numérique</div>
+        <div class="signature-year">© 2025-2026 Tous droits réservés</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- SECTION GAUCHE -->
+    <div class="left-section">
+      <!-- ÉCRAN MONITOR -->
+      <div class="monitor-screen">
+        <div class="monitor-header" id="monitorHeader">█ BIOS BOOT SEQUENCE v5.3.2 █</div>
+        <div class="monitor-content">
+          <div class="monitor-text" id="monitorText">
+            <div class="screen-line">> Système en attente...</div>
+          </div>
+        </div>
+        <div class="monitor-footer" id="monitorFooter">GPU: RTX 4080 | HDMI 2.1 | 1920x1080 60Hz</div>
+      </div>
+
+      <!-- CONTRÔLES -->
+      <div class="controls">
+        <button class="btn" id="startBtn">▶ DÉMARRER</button>
+        <button class="btn" id="pauseBtn" disabled>⏸ PAUSE</button>
+        <button class="btn" id="resetBtn">⟳ RESET</button>
+      </div>
+    </div>
+
+    <!-- SECTION DROITE -->
+    <div class="right-section">
+      <!-- SCHÉMA -->
+      <div class="schema-box">
+        <svg class="canvas" id="canvas"></svg>
+        <div class="components-wrapper">
+          <div class="motherboard-center">
+            <!-- Schéma simple de carte mère -->
+            <svg class="motherboard-svg" width="420" height="260" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" aria-label="Schéma de carte mère">
+              <defs>
+                <linearGradient id="mbGrad" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#0a0a0a" />
+                  <stop offset="100%" stop-color="#1a1a1a" />
+                </linearGradient>
+                <linearGradient id="chipGrad" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#2a2a2a" />
+                  <stop offset="100%" stop-color="#3a3a3a" />
+                </linearGradient>
+              </defs>
+              
+              <!-- Carte mère principale -->
+              <rect x="20" y="20" width="380" height="220" rx="15" fill="url(#mbGrad)" stroke="#00d9ff" stroke-width="3"/>
+              
+              <!-- Socket CPU (centre) -->
+              <rect x="190" y="100" width="40" height="40" rx="5" fill="url(#chipGrad)" stroke="#00ff88" stroke-width="2"/>
+              
+              <!-- BIOS Chip (coin supérieur droit) -->
+              <rect x="320" y="40" width="60" height="30" rx="3" fill="url(#chipGrad)" stroke="#00ff88" stroke-width="2"/>
+              
+              <!-- Slots RAM (gauche) -->
+              <rect x="60" y="50" width="80" height="15" rx="2" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              <rect x="60" y="75" width="80" height="15" rx="2" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              
+              <!-- Slots PCIe (gauche) -->
+              <rect x="60" y="120" width="60" height="12" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              <rect x="60" y="140" width="60" height="12" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              <rect x="60" y="160" width="60" height="12" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              
+              <!-- Connecteurs SATA (bas gauche) -->
+              <rect x="60" y="190" width="12" height="6" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              <rect x="80" y="190" width="12" height="6" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              <rect x="100" y="190" width="12" height="6" rx="1" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              
+              <!-- Connecteurs d'alimentation (droite) -->
+              <rect x="300" y="120" width="30" height="15" rx="2" fill="url(#chipGrad)" stroke="#00ff88" stroke-width="2"/>
+              <rect x="300" y="145" width="25" height="12" rx="2" fill="url(#chipGrad)" stroke="#00ff88" stroke-width="2"/>
+              
+              <!-- Connecteurs I/O (bas droite) -->
+              <rect x="300" y="190" width="80" height="20" rx="3" fill="url(#chipGrad)" stroke="#00d9ff" stroke-width="1"/>
+              
+              
+              <!-- Condensateurs et résistances (petits rectangles) -->
+              <rect x="250" y="60" width="8" height="4" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              <rect x="250" y="70" width="8" height="4" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              <rect x="250" y="80" width="8" height="4" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              
+              <rect x="150" y="200" width="6" height="3" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              <rect x="160" y="200" width="6" height="3" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              <rect x="170" y="200" width="6" height="3" rx="1" fill="#4a4a4a" stroke="#00d9ff" stroke-width="0.5"/>
+              
+              <!-- Vis de fixation (cercles) -->
+              <circle cx="30" cy="30" r="3" fill="#666" stroke="#00d9ff" stroke-width="1"/>
+              <circle cx="390" cy="30" r="3" fill="#666" stroke="#00d9ff" stroke-width="1"/>
+              <circle cx="30" cy="230" r="3" fill="#666" stroke="#00d9ff" stroke-width="1"/>
+              <circle cx="390" cy="230" r="3" fill="#666" stroke="#00d9ff" stroke-width="1"/>
+            </svg>
+            <div class="mb-info">CARTE MÈRE</div>
+          </div>
+
+          <div id="psu" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/B31CpWw.png" alt="PSU"/></div><div class="component-label">PSU</div></div>
+          <div id="cpu" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/UEPGdAV.png" alt="CPU"/></div><div class="component-label">CPU</div></div>
+          <div id="ram" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/UCLkwbw.png" alt="RAM"/></div><div class="component-label">RAM</div></div>
+          <div id="ssd" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/gSVxcRM.png" alt="SSD"/></div><div class="component-label">SSD</div></div>
+          <div id="hdd" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/b3sx3dU.png" alt="HDD"/></div><div class="component-label">HDD</div></div>
+          <div id="gpu" class="component"><div class="component-box"><img class="component-img" src="https://i.imgur.com/IaNz9vZ.png" alt="GPU"/></div><div class="component-label">GPU</div></div>
+        </div>
+      </div>
+
+      <!-- CHRONOLOGIE -->
+      <div class="timeline-box">
+        <div class="timeline-title">📋 ÉTAPES</div>
+        <div id="timeline"></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentScenario = 1;
+    let running = false;
+    let paused = false;
+    let timeouts = [];
+    let frames = [];
+    let pausedData = { step: 0, phase: 'components' };
+    let particles = [];
+    let matrixColumns = [];
+
+    // Effets sonores simulés
+    const soundEffects = {
+      beep: () => {
+        // Simulation d'un bip sonore
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.type = 'square';
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      },
+      
+      startup: () => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.5);
+        oscillator.type = 'sawtooth';
+        
+        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      }
+    };
+
+    // Création de particules
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * window.innerWidth + 'px';
+      particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+      particle.style.animationDelay = Math.random() * 2 + 's';
+      document.body.appendChild(particle);
+      
+      particles.push(particle);
+      
+      setTimeout(() => {
+        if (particle.parentNode) {
+          particle.parentNode.removeChild(particle);
+        }
+        const index = particles.indexOf(particle);
+        if (index > -1) {
+          particles.splice(index, 1);
+        }
+      }, 6000);
+    }
+
+    // Effet Matrix Rain
+    function createMatrixRain() {
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+      
+      for (let i = 0; i < 20; i++) {
+        const column = document.createElement('div');
+        column.className = 'matrix-column';
+        column.style.left = Math.random() * window.innerWidth + 'px';
+        column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        column.style.animationDelay = Math.random() * 2 + 's';
+        
+        let text = '';
+        for (let j = 0; j < 20; j++) {
+          text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+        }
+        column.innerHTML = text;
+        
+        document.body.appendChild(column);
+        matrixColumns.push(column);
+        
+        setTimeout(() => {
+          if (column.parentNode) {
+            column.parentNode.removeChild(column);
+          }
+          const index = matrixColumns.indexOf(column);
+          if (index > -1) {
+            matrixColumns.splice(index, 1);
+          }
+        }, 5000);
+      }
+    }
+
+    // Effet de typing
+    function typeText(element, text, speed = 50) {
+      element.innerHTML = '';
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, speed);
+    }
+
+    const scenarios = {
+      1: {
+        name: 'BIOS',
+        header: '█ BIOS BOOT SEQUENCE v5.3.2 █',
+        footer: 'BIOS Mode | ROM: 16MB | Status: Running',
+        components: [
+          { id: 'psu', name: 'PSU' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'ram', name: 'RAM' },
+        ],
+        messages: [
+          '> System Power On',
+          '> BIOS Initialization Start',
+          '> POST - Power On Self Test',
+          '> Detecting CPU... Intel Core i7-13700K',
+          '> Memory Detection: 16GB DDR5',
+          '> Testing Memory Banks...',
+          '> Memory Test OK',
+          '> Detecting Storage Devices...',
+          '> SSD NVMe Detected: 1TB',
+          '> HDD SATA Detected: 4TB',
+          '✓ BIOS Setup Complete',
+          '✓ Ready to Boot OS'
+        ]
+      },
+      2: {
+        name: 'Windows 11',
+        header: '█ WINDOWS 11 BOOT LOADER █',
+        footer: 'EFI Mode | GPU: RTX 4080 | UEFI Enabled',
+        components: [
+          { id: 'psu', name: 'PSU' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'ram', name: 'RAM' },
+          { id: 'ssd', name: 'SSD' },
+          { id: 'gpu', name: 'GPU' },
+        ],
+        messages: [
+          '> Boot Media Found: Windows 11',
+          '> Loading Bootloader...',
+          '> Initializing Kernel...',
+          '> Loading HAL (Hardware Abstraction Layer)',
+          '> Initializing Device Drivers',
+          '> GPU Driver Loaded',
+          '> Network Stack Initialized',
+          '> File System Mounted',
+          '> System Services Starting',
+          '> Desktop Window Manager Loading',
+          '> User Session Initializing',
+          '✓ Windows 11 Successfully Started',
+          '✓ Desktop Ready'
+        ]
+      },
+      3: {
+        name: 'MS Word',
+        header: '█ APPLICATION LAUNCH: MS WORD █',
+        footer: 'Windows 11 Desktop | GPU Rendering | RAM: 8GB Allocated',
+        components: [
+          { id: 'ram', name: 'RAM' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'gpu', name: 'GPU' },
+          { id: 'ssd', name: 'SSD' },
+        ],
+        messages: [
+          '> Launching Microsoft Word 365',
+          '> Loading from: C:\\Program Files\\Microsoft Office\\WINWORD.EXE',
+          '> Allocating 2GB RAM...',
+          '> Loading DLL Libraries...',
+          '> Initializing GPU Rendering Engine',
+          '> Loading Font Cache',
+          '> Initializing Document Template',
+          '> Loading Ribbon Interface',
+          '> Initializing Spell Check',
+          '> Setting Up Cloud Sync',
+          '> Loading Recent Documents',
+          '✓ Microsoft Word Ready',
+          '✓ Ready to Create Document'
+        ]
+      },
+      4: {
+        name: 'Linux',
+        header: '█ LINUX KERNEL BOOT SEQUENCE █',
+        footer: 'GRUB Bootloader | Kernel 6.5.0 | Systemd 253',
+        components: [
+          { id: 'psu', name: 'PSU' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'ram', name: 'RAM' },
+          { id: 'ssd', name: 'SSD' },
+          { id: 'gpu', name: 'GPU' },
+        ],
+        messages: [
+          '> GRUB Bootloader Initialized',
+          '> Loading Linux Kernel 6.5.0...',
+          '> Mounting root filesystem (ext4)',
+          '> Starting systemd init system',
+          '> Loading kernel modules...',
+          '> Initializing hardware drivers',
+          '> Starting network services',
+          '> Loading desktop environment (GNOME)',
+          '> Starting display manager (GDM)',
+          '> Initializing audio system (PulseAudio)',
+          '> Loading user session',
+          '✓ Linux Desktop Ready',
+          '✓ Welcome to Ubuntu 23.10'
+        ]
+      },
+      5: {
+        name: 'Gaming',
+        header: '█ GAMING MODE ACTIVATION █',
+        footer: 'RTX 4080 | 32GB DDR5 | 144Hz | RGB ON',
+        components: [
+          { id: 'psu', name: 'PSU' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'ram', name: 'RAM' },
+          { id: 'gpu', name: 'GPU' },
+          { id: 'ssd', name: 'SSD' },
+        ],
+        messages: [
+          '> Gaming Mode Activated',
+          '> Overclocking CPU to 5.2GHz...',
+          '> GPU Boost Clock: 2500MHz',
+          '> Enabling RGB Lighting System',
+          '> Loading Gaming Profiles...',
+          '> Initializing Razer Synapse',
+          '> Starting Corsair iCUE',
+          '> Optimizing for 144Hz Display',
+          '> Loading Steam Client',
+          '> Initializing Discord Overlay',
+          '> Setting up OBS Studio',
+          '✓ Gaming Setup Complete',
+          '✓ Ready to Dominate!'
+        ]
+      },
+      6: {
+        name: 'AI Mode',
+        header: '█ ARTIFICIAL INTELLIGENCE INITIALIZATION █',
+        footer: 'CUDA 12.0 | TensorRT | 24GB VRAM | AI Ready',
+        components: [
+          { id: 'psu', name: 'PSU' },
+          { id: 'cpu', name: 'CPU' },
+          { id: 'ram', name: 'RAM' },
+          { id: 'gpu', name: 'GPU' },
+          { id: 'ssd', name: 'SSD' },
+        ],
+        messages: [
+          '> AI Neural Network Initializing...',
+          '> Loading CUDA 12.0 Runtime',
+          '> Initializing TensorRT Engine',
+          '> Loading PyTorch Framework',
+          '> Starting Jupyter Notebook Server',
+          '> Loading Pre-trained Models...',
+          '> Initializing OpenAI API',
+          '> Starting Machine Learning Pipeline',
+          '> Loading Computer Vision Libraries',
+          '> Initializing Natural Language Processing',
+          '> Setting up Data Science Environment',
+          '✓ AI Development Environment Ready',
+          '✓ Ready to Create the Future!'
+        ]
+      }
+    };
+
+    function initTimeline() {
+      const tl = document.getElementById('timeline');
+      tl.innerHTML = '';
+      const scenario = scenarios[currentScenario];
+      scenario.components.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.id = 'tl-' + c.id;
+        div.innerHTML = `<div class="timeline-dot"></div><span>${i+1}. ${c.name}</span>`;
+        tl.appendChild(div);
+      });
+    }
+
+    function updateScreen(text, success = false) {
+      const m = document.getElementById('monitorText');
+      const l = document.createElement('div');
+      l.className = 'screen-line' + (success ? ' success' : '');
+      
+      // Effet de typing pour les messages
+      if (text.includes('>')) {
+        l.classList.add('typing');
+        typeText(l, text, 50);
+      } else {
+      l.textContent = text;
+      }
+      
+      m.appendChild(l);
+      m.parentElement.scrollTop = m.parentElement.scrollHeight;
+      
+      // Effet sonore
+      if (success) {
+        soundEffects.beep();
+      }
+    }
+
+    function showBubble(text, id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const b = document.createElement('div');
+      b.className = 'message-bubble';
+      b.textContent = text;
+      b.style.left = (rect.left - 60) + 'px';
+      b.style.top = (rect.top - 70) + 'px';
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 1300);
+    }
+
+    function drawLine(id) {
+    const from = document.getElementById(id);
+    let to = document.querySelector('.motherboard-center svg.motherboard-svg');
+    if (!to) return; // nothing to draw to
+    const f = from.getBoundingClientRect();
+    const t = to.getBoundingClientRect();
+      const s = document.querySelector('.schema-box').getBoundingClientRect();
+
+      const x1 = f.left - s.left + f.width/2;
+      const y1 = f.top - s.top + f.height/2;
+      const x2 = t.left - s.left + t.width/2;
+      const y2 = t.top - s.top + t.height/2;
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      line.setAttribute('class', 'connection-line');
+      document.getElementById('canvas').appendChild(line);
+
+      const p = document.createElement('div');
+      p.className = 'data-packet';
+      document.querySelector('.schema-box').appendChild(p);
+
+      const t0 = Date.now();
+      const animate = () => {
+        if (paused) {
+          const f = requestAnimationFrame(animate);
+          frames.push(f);
+          return;
+        }
+        const elapsed = Date.now() - t0;
+        const ratio = Math.min(elapsed / 900, 1);
+        p.style.left = (x1 + (x2-x1)*ratio - 5) + 'px';
+        p.style.top = (y1 + (y2-y1)*ratio - 5) + 'px';
+        if(ratio < 1) {
+          const f = requestAnimationFrame(animate);
+          frames.push(f);
+        } else {
+          p.remove();
+          setTimeout(() => line.remove(), 300);
+        }
+      };
+      animate();
+    }
+
+    function activate(idx) {
+      const scenario = scenarios[currentScenario];
+      const c = scenario.components[idx];
+      const el = document.getElementById(c.id);
+      el.classList.add('active');
+      updateScreen(`> ${c.name} Initializing...`);
+      showBubble(c.name, c.id);
+      drawLine(c.id);
+
+      // Effets spécifiques selon le scénario
+      applyScenarioEffects(c.name, idx);
+
+      const tl = document.getElementById('tl-' + c.id);
+      if (tl) {
+        tl.classList.add('active');
+        setTimeout(() => {
+          tl.classList.remove('active');
+          tl.classList.add('completed');
+        }, 1200);
+      }
+
+      setTimeout(() => el.classList.remove('active'), 1200);
+
+      const total = scenario.components.length + scenario.messages.length;
+      document.getElementById('progress').style.width = ((idx+1)/total*100) + '%';
+    }
+
+    // Effets spécifiques par scénario
+    function applyScenarioEffects(componentName, idx) {
+      switch(currentScenario) {
+        case 1: // BIOS
+          // Effet de scan BIOS
+          createBIOSEffect(componentName);
+          break;
+        case 2: // Windows 11
+          // Effet Windows avec fenêtres
+          createWindowsEffect(componentName);
+          break;
+        case 3: // MS Word
+          // Effet de document qui s'ouvre
+          createWordEffect(componentName);
+          break;
+        case 4: // Linux
+          // Effet terminal Linux
+          createLinuxEffect(componentName);
+          break;
+        case 5: // Gaming
+          // Effet RGB et gaming
+          createGamingEffect(componentName);
+          break;
+        case 6: // AI Mode
+          // Effet Matrix et IA
+          createAIEffect(componentName);
+          break;
+      }
+    }
+
+    // Effet BIOS - scan et vérification
+    function createBIOSEffect(component) {
+      // Particules de scan
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.background = '#00ff88';
+          particle.style.left = Math.random() * window.innerWidth + 'px';
+          particle.style.animationDuration = '1.5s';
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 1500);
+        }, i * 150);
+      }
+      
+      // Son de bip BIOS
+      setTimeout(() => soundEffects.beep(), 200);
+    }
+
+    // Effet Windows - fenêtres qui s'ouvrent
+    function createWindowsEffect(component) {
+      // Créer une fenêtre Windows
+      const window = document.createElement('div');
+      window.style.cssText = `
+        position: fixed;
+        top: 30%;
+        left: 60%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 180px;
+        height: 120px;
+        background: #f0f0f0;
+        border: 2px solid #0078d4;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: windowOpen 0.8s ease-out forwards;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes windowOpen {
+          to { transform: translate(-50%, -50%) scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      window.innerHTML = `
+        <div style="background: #0078d4; color: white; padding: 6px; font-size: 11px; font-weight: bold;">
+          ${component} - W11
+        </div>
+        <div style="padding: 8px; color: #333; font-size: 10px;">
+          Loading ${component}...
+        </div>
+      `;
+      
+      document.body.appendChild(window);
+      setTimeout(() => window.remove(), 2500);
+    }
+
+    // Effet MS Word - document qui s'ouvre
+    function createWordEffect(component) {
+      // Créer un document Word
+      const doc = document.createElement('div');
+      doc.style.cssText = `
+        position: fixed;
+        top: 25%;
+        left: 15%;
+        width: 250px;
+        height: 160px;
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1000;
+        animation: docOpen 0.8s ease-out;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes docOpen {
+          from { transform: scale(0) rotate(-3deg); opacity: 0; }
+          to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      doc.innerHTML = `
+        <div style="background: #2b579a; color: white; padding: 6px; font-size: 11px;">
+          Word - ${component}
+        </div>
+        <div style="padding: 12px; color: #333; font-family: 'Times New Roman'; font-size: 10px;">
+          <p>Loading ${component}...</p>
+          <p>Initializing template...</p>
+        </div>
+      `;
+      
+      document.body.appendChild(doc);
+      setTimeout(() => doc.remove(), 2800);
+    }
+
+    // Effet Linux - terminal
+    function createLinuxEffect(component) {
+      // Créer un terminal Linux
+      const terminal = document.createElement('div');
+      terminal.style.cssText = `
+        position: fixed;
+        top: 35%;
+        right: 15%;
+        width: 300px;
+        height: 160px;
+        background: #1e1e1e;
+        border: 2px solid #00ff88;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        color: #00ff88;
+        padding: 12px;
+        z-index: 1000;
+        animation: terminalOpen 0.8s ease-out;
+        font-size: 10px;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes terminalOpen {
+          from { transform: translateY(-80px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      terminal.innerHTML = `
+        <div style="color: #00d9ff; margin-bottom: 8px;">user@linux:~$ sudo init ${component}</div>
+        <div style="color: #00ff88;">[sudo] password: ****</div>
+        <div style="color: #00ff88;">Initializing ${component}...</div>
+        <div style="color: #00ff88;">✓ ${component} started</div>
+        <div style="color: #00d9ff;">user@linux:~$ _</div>
+      `;
+      
+      document.body.appendChild(terminal);
+      setTimeout(() => terminal.remove(), 3000);
+    }
+
+    // Effet Gaming - RGB et effets flashy
+    function createGamingEffect(component) {
+      // Effet RGB sur le composant
+      const el = document.getElementById(component.toLowerCase());
+      if (el) {
+        el.style.animation = 'rgbPulse 0.3s ease-in-out 2';
+      }
+      
+      // Ajouter l'animation RGB
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes rgbPulse {
+          0% { box-shadow: 0 0 15px #ff0000; }
+          25% { box-shadow: 0 0 15px #00ff00; }
+          50% { box-shadow: 0 0 15px #0000ff; }
+          75% { box-shadow: 0 0 15px #ffff00; }
+          100% { box-shadow: 0 0 15px #ff00ff; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Particules colorées
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+          particle.style.left = Math.random() * window.innerWidth + 'px';
+          particle.style.animationDuration = '1.2s';
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 1200);
+        }, i * 80);
+      }
+    }
+
+    // Effet AI - Matrix et particules intelligentes
+    function createAIEffect(component) {
+      // Matrix Rain (réduit)
+      if (Math.random() > 0.5) {
+        createMatrixRain();
+      }
+      
+      // Particules intelligentes (plus complexes)
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.background = '#00ff88';
+          particle.style.left = Math.random() * window.innerWidth + 'px';
+          particle.style.animationDuration = '2s';
+          particle.style.boxShadow = '0 0 12px #00ff88';
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 2000);
+        }, i * 200);
+      }
+      
+      // Effet de glitch sur le texte (plus court)
+      const monitorText = document.getElementById('monitorText');
+      if (monitorText) {
+        monitorText.classList.add('glitch');
+        setTimeout(() => monitorText.classList.remove('glitch'), 600);
+      }
+    }
+
+    function runPhase() {
+      const scenario = scenarios[currentScenario];
+      let compIdx = pausedData.phase === 'components' ? pausedData.step : 0;
+
+      const runComponents = (idx) => {
+        if (paused) {
+          pausedData = { step: idx, phase: 'components' };
+          return;
+        }
+        if (idx >= scenario.components.length) {
+          runMessages(0);
+          return;
+        }
+        activate(idx);
+        const t = setTimeout(() => runComponents(idx + 1), 2500);
+        timeouts.push(t);
+      };
+
+      const runMessages = (idx) => {
+        if (paused) {
+          pausedData = { step: idx, phase: 'messages' };
+          return;
+        }
+        if (idx >= scenario.messages.length) {
+          running = false;
+          document.getElementById('startBtn').disabled = false;
+          document.getElementById('pauseBtn').disabled = true;
+          document.getElementById('progress').style.width = '100%';
+          return;
+        }
+
+        const msg = scenario.messages[idx];
+        updateScreen(msg, msg.includes('✓'));
+        const total = scenario.components.length + scenario.messages.length;
+        document.getElementById('progress').style.width = ((scenario.components.length+idx+1)/total*100) + '%';
+
+        // Délai plus long pour les messages de succès
+        const delay = msg.includes('✓') ? 1800 : 1200;
+        const t = setTimeout(() => runMessages(idx + 1), delay);
+        timeouts.push(t);
+      };
+
+      if (pausedData.phase === 'components') {
+        runComponents(compIdx);
+      } else {
+        runMessages(pausedData.step);
+      }
+    }
+
+    function reset() {
+      timeouts.forEach(t => clearTimeout(t));
+      frames.forEach(f => cancelAnimationFrame(f));
+      timeouts = [];
+      frames = [];
+      running = false;
+      paused = false;
+      pausedData = { step: 0, phase: 'components' };
+
+      const scenario = scenarios[currentScenario];
+      document.getElementById('monitorText').innerHTML = '<div class="screen-line">> Système en attente...</div>';
+      document.getElementById('monitorHeader').textContent = scenario.header;
+      document.getElementById('monitorFooter').textContent = scenario.footer;
+      document.getElementById('progress').style.width = '0%';
+      document.querySelectorAll('.component').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.timeline-item').forEach(t => t.classList.remove('active','completed'));
+      document.getElementById('canvas').innerHTML = '';
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('pauseBtn').textContent = '⏸ PAUSE';
+    }
+
+    // Événements scénarios
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (running) return;
+        document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentScenario = parseInt(e.target.dataset.scenario);
+        reset();
+      });
+    });
+
+    // Événements boutons
+    document.getElementById('startBtn').addEventListener('click', () => {
+      if (running) return;
+      running = true;
+      paused = false;
+      pausedData = { step: 0, phase: 'components' };
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('resetBtn').disabled = true;
+
+      // Effets de démarrage spécifiques au scénario
+      applyStartupEffects();
+
+      const scenario = scenarios[currentScenario];
+      document.getElementById('monitorHeader').textContent = scenario.header;
+      document.getElementById('monitorFooter').textContent = scenario.footer;
+      document.getElementById('monitorText').innerHTML = '';
+      document.getElementById('progress').style.width = '0%';
+      updateScreen(scenario.header);
+      initTimeline();
+      runPhase();
+    });
+
+    // Effets de démarrage spécifiques par scénario
+    function applyStartupEffects() {
+      switch(currentScenario) {
+        case 1: // BIOS
+          // Effet de scan BIOS au démarrage
+          createBIOSStartupEffect();
+          break;
+        case 2: // Windows 11
+          // Effet de chargement Windows
+          createWindowsStartupEffect();
+          break;
+        case 3: // MS Word
+          // Effet d'ouverture de document
+          createWordStartupEffect();
+          break;
+        case 4: // Linux
+          // Effet de boot Linux
+          createLinuxStartupEffect();
+          break;
+        case 5: // Gaming
+          // Effet de lancement gaming
+          createGamingStartupEffect();
+          break;
+        case 6: // AI Mode
+          // Effet d'initialisation IA
+          createAIStartupEffect();
+          break;
+      }
+    }
+
+    function createBIOSStartupEffect() {
+      soundEffects.startup();
+      // Effet de scan vertical
+      const scanLine = document.createElement('div');
+      scanLine.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        z-index: 1000;
+        animation: biosScan 1.5s ease-in-out;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes biosScan {
+          0% { transform: translateY(0); opacity: 1; }
+          100% { transform: translateY(100vh); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(scanLine);
+      setTimeout(() => scanLine.remove(), 1500);
+    }
+
+    function createWindowsStartupEffect() {
+      // Effet de chargement Windows avec logo
+      const logo = document.createElement('div');
+      logo.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: #0078d4;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: windowsLogo 3s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+      `;
+      logo.textContent = 'W11';
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes windowsLogo {
+          0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+          50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(logo);
+      setTimeout(() => logo.remove(), 3500);
+    }
+
+    function createWordStartupEffect() {
+      // Effet de document qui s'ouvre
+      const doc = document.createElement('div');
+      doc.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 180px;
+        height: 120px;
+        background: white;
+        border: 2px solid #2b579a;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        z-index: 1000;
+        animation: wordOpen 2s ease-out forwards;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes wordOpen {
+          0% { transform: translate(-50%, -50%) scale(0) rotate(-5deg); }
+          100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      doc.innerHTML = `
+        <div style="background: #2b579a; color: white; padding: 6px; font-size: 12px; font-weight: bold;">
+          Microsoft Word
+        </div>
+        <div style="padding: 12px; color: #333;">
+          <div style="font-size: 10px;">Loading...</div>
+        </div>
+      `;
+      
+      document.body.appendChild(doc);
+      setTimeout(() => doc.remove(), 3000);
+    }
+
+    function createLinuxStartupEffect() {
+      // Effet de terminal qui s'ouvre
+      const terminal = document.createElement('div');
+      terminal.style.cssText = `
+        position: fixed;
+        top: 25%;
+        left: 15%;
+        width: 350px;
+        height: 200px;
+        background: #1e1e1e;
+        border: 2px solid #00ff88;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        color: #00ff88;
+        padding: 12px;
+        z-index: 1000;
+        animation: terminalBoot 2.5s ease-out;
+        font-size: 11px;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes terminalBoot {
+          0% { transform: translateY(-80px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      terminal.innerHTML = `
+        <div style="color: #00d9ff; margin-bottom: 8px;">Linux Boot Sequence</div>
+        <div style="color: #00ff88;">Loading kernel...</div>
+        <div style="color: #00ff88;">Initializing hardware...</div>
+        <div style="color: #00ff88;">Starting services...</div>
+        <div style="color: #00ff88;">✓ System ready</div>
+      `;
+      
+      document.body.appendChild(terminal);
+      setTimeout(() => terminal.remove(), 3500);
+    }
+
+    function createGamingStartupEffect() {
+      // Effet RGB de démarrage gaming
+      const rgbOverlay = document.createElement('div');
+      rgbOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff);
+        opacity: 0.1;
+        z-index: 999;
+        animation: rgbFlash 0.8s ease-in-out;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes rgbFlash {
+          0% { opacity: 0; }
+          50% { opacity: 0.2; }
+          100% { opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(rgbOverlay);
+      setTimeout(() => rgbOverlay.remove(), 800);
+      
+      // Particules colorées
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => createParticle(), i * 120);
+      }
+    }
+
+    function createAIStartupEffect() {
+      // Effet Matrix au démarrage (réduit)
+      if (Math.random() > 0.3) {
+        createMatrixRain();
+      }
+      
+      // Effet de glitch sur l'écran
+      const glitchOverlay = document.createElement('div');
+      glitchOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 136, 0.1) 2px, rgba(0, 255, 136, 0.1) 4px);
+        z-index: 999;
+        animation: glitchScan 1.5s ease-in-out;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes glitchScan {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(glitchOverlay);
+      setTimeout(() => glitchOverlay.remove(), 1500);
+    }
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      paused = !paused;
+      document.getElementById('pauseBtn').textContent = paused ? '▶ REPRENDRE' : '⏸ PAUSE';
+      if (!paused) runPhase();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => reset());
+
+    // Initialisation des effets au chargement
+    function initEffects() {
+      // Créer des particules de fond
+      setInterval(() => {
+        if (particles.length < 10) {
+          createParticle();
+        }
+      }, 2000);
+
+      // Effet Matrix Rain pour le mode AI
+      if (currentScenario === 6) {
+        setInterval(() => {
+          if (matrixColumns.length < 5) {
+            createMatrixRain();
+          }
+        }, 3000);
+      }
+    }
+
+    // Démarrer les effets
+    initEffects();
+    initTimeline();
+  </script>
+
+</body>
+</html>
